@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    h2 { margin-bottom: 20px; color: #333; }
+    input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0056b3; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <input id="email" type="text" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <div id="errorMsg" class="error"></div>
+  </div>
+
+  <script>
+    document.getElementById("loginBtn").addEventListener("click", login);
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+      errorMsg.textContent = "";
+
+      if (!email || !password) {
+        errorMsg.textContent = "Please enter both email and password.";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3334/api/v1/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.data?.token) {
+          localStorage.setItem("token", data.data.token);
+          window.location.href = "admin.html";
+        } else {
+          errorMsg.textContent = data.message || "Login failed.";
+        }
+      } catch (err) {
+        errorMsg.textContent = "Error connecting to server.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

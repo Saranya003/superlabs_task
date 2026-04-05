@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Listing</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; }
+    .search-bar { text-align: center; margin-bottom: 20px; }
+    input { padding: 8px; width: 300px; }
+    button { padding: 8px 12px; margin-left: 5px; }
+    .admin-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; }
+
+    .product-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+    .product-card {
+      background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      width: 220px; padding: 15px; text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .product-card img {
+      max-width: 100%; height: 150px; object-fit: cover; margin-bottom: 10px;
+    }
+    .product-card h3 { margin: 10px 0 5px; font-size: 16px; color: #333; }
+    .product-card p { font-size: 14px; color: #666; margin: 5px 0; }
+    .price { font-weight: bold; color: #007bff; }
+    .discount { color: red; font-size: 13px; }
+    .product-card button {
+      margin-top: 10px; padding: 8px 12px; border: none; border-radius: 4px;
+      cursor: pointer; background: #28a745; color: #fff;
+    }
+    .product-card button:hover { background: #218838; }
+  </style>
+</head>
+<body>
+  <h1>Product Listing</h1>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search for products...">
+    <button id="searchBtn">Search</button>
+    <button class="admin-btn" id="adminBtn">Admin Login</button>
+  </div>
+
+  <div class="product-grid" id="productGrid"></div>
+
+  <script>
+    document.getElementById("adminBtn").addEventListener("click", () => {
+      window.location.href = "/login.html";
+    });
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      const q = document.getElementById("searchInput").value;
+      loadProducts(q);
+    });
+
+    const API_BASE = "http://localhost:3334/api/v1/user/products";
+
+    async function loadProducts(query="") {
+      try {
+        const res = await fetch(`${API_BASE}?q=${encodeURIComponent(query)}&page=1`);
+
+ 
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data = await res.json();
+
+        console.log("data", data);
+
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = "";
+
+        (data.data || []).forEach(p => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          let imgSrc;
+       
+
+if (p.image_url) {
+  // Handle array or string
+  const firstImage = Array.isArray(p.image_url) ? p.image_url[0] : p.image_url;
+
+  if (typeof firstImage === "string" && firstImage.startsWith("http")) {
+    // External full URL
+    imgSrc = firstImage;
+  } else {
+    // Local relative path served by backend
+    imgSrc = `http://localhost:3334${firstImage}`;
+  }
+} else {
+  // Fallback image
+  imgSrc = "http://localhost:3334/uploads/products/default.jpg";
+}
+
+            console.log(imgSrc);
+
+          card.innerHTML = `
+            <img src="${imgSrc}" alt="${p.name}">
+            <h3>${p.name}</h3>
+            <p>${p.description || ''}</p>
+            <p class="price">₹${p.price}</p>
+            ${p.discount ? `<p class="discount">Save ${p.discount}%</p>` : ""}
+            <button class="view-btn">View</button>
+          `;
+
+          card.querySelector(".view-btn").addEventListener("click", () => {
+            window.location.href = `detail.html?id=${p.id}`;
+          });
+
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error loading products:", err);
+      }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>

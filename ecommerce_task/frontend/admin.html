@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Product Management</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    form { margin-bottom: 20px; }
+    label { display: block; margin: 8px 0 4px; font-weight: bold; }
+    input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { margin-top: 10px; padding: 10px 15px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #007bff; color: #fff; }
+    .actions button { margin-right: 5px; background: #28a745; }
+    .actions button.delete { background: #dc3545; }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel - Product Management</h1>
+  <div class="container">
+    <form id="createForm">
+      <h2 id="formTitle">Create Product</h2>
+      <label>Name</label>
+      <input type="text" id="name" required>
+      <label>Description</label>
+      <textarea id="description"></textarea>
+      <label>Price</label>
+      <input type="number" id="price" required>
+      <label>SKU</label>
+      <input type="text" id="sku" required>
+      <label>Images (comma separated URLs)</label>
+      <input type="text" id="images">
+      <label>Availability</label>
+      <input type="checkbox" id="availability" checked>
+      <button type="submit" id="submitBtn">Add Product</button>
+    </form>
+
+    <h2>Product List</h2>
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Price</th><th>SKU</th><th>Availability</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:3334/api/v1/admin/products";
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem("token");
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
+    }
+
+    let editingProductId = null;
+
+    async function loadProducts() {
+      const res = await fetch(API_BASE, { headers: getAuthHeaders() });
+      if (!res.ok) { alert("Failed to load products"); return; }
+      const products = await res.json();
+      const tbody = document.querySelector("#productTable tbody");
+      tbody.innerHTML = "";
+
+      products.data.forEach(p => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${p.id}</td>
+          <td>${p.name}</td>
+          <td>${p.price}</td>
+          <td>${p.sku}</td>
+          <td>${p.availability ? "Yes" : "No"}</td>
+          <td class="actions"></td>
+        `;
+        const actionsCell = row.querySelector(".actions");
+
+        // Edit button
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => startEdit(p);
+        actionsCell.appendChild(editBtn);
+
+        // Delete button
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.classList.add("delete");
+        delBtn.onclick = () => deleteProduct(p.id);
+        actionsCell.appendChild(delBtn);
+
+        tbody.appendChild(row);
+      });
+    }
+
+    function startEdit(product) {
+      editingProductId = product.id;
+      document.getElementById("name").value = product.name;
+      document.getElementById("description").value = product.description || "";
+      document.getElementById("price").value = product.price;
+      document.getElementById("sku").value = product.sku;
+      document.getElementById("availability").checked = product.availability;
+      document.getElementById("images").value = (product.images || []).join(", ");
+
+      document.getElementById("formTitle").textContent = "Update Product";
+      document.getElementById("submitBtn").textContent = "Update Product";
+    }
+
+    document.getElementById("createForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        price: parseFloat(document.getElementById("price").value),
+        sku: document.getElementById("sku").value,
+        images: document.getElementById("images").value.split(",").map(s => s.trim()).filter(Boolean),
+        availability: document.getElementById("availability").checked
+      };
+
+      let res;
+      if (editingProductId) {
+        res = await fetch(`${API_BASE}/${editingProductId}`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch(API_BASE, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if (!res.ok) { alert("Save failed"); return; }
+
+      await loadProducts();
+      e.target.reset();
+      editingProductId = null;
+      document.getElementById("formTitle").textContent = "Create Product";
+      document.getElementById("submitBtn").textContent = "Add Product";
+    });
+
+    async function deleteProduct(id) {
+      const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE", headers: getAuthHeaders() });
+      if (!res.ok) { alert("Delete failed"); return; }
+      await loadProducts();
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>

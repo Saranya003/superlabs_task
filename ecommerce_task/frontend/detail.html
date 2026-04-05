@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Detail</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    .detail-card {
+      max-width: 600px; margin: auto; background: #fff; padding: 20px;
+      border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .detail-card img { max-width: 100%; margin-bottom: 15px; }
+    h2 { margin: 10px 0; }
+    p { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <div class="detail-card" id="detail"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const API_BASE = "http://localhost:3334/api/v1/user/products";
+
+    async function loadDetail() {
+      const res = await fetch(`${API_BASE}/${id}`);
+      const data = await res.json();
+      const p = data.data;
+
+      const detail = document.getElementById("detail");
+      const imgHtml = (p.image_url || []).map(img =>
+        `<img src="http://localhost:3334${img}" alt="${p.name}">`
+      ).join("");
+
+      detail.innerHTML = `
+        ${imgHtml}
+        <h2>${p.name}</h2>
+        <p>${p.description}</p>
+        <p><strong>Price:</strong> ₹${p.price}</p>
+        <p><strong>SKU:</strong> ${p.sku}</p>
+        <p><strong>Availability:</strong> ${p.availability ? "Yes" : "No"}</p>
+        ${p.discount ? `<p><strong>Discount:</strong> ${p.discount}%</p>` : ""}
+      `;
+    }
+
+    loadDetail();
+  </script>
+</body>
+</html>
