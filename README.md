@@ -79,6 +79,13 @@ git clone git@github.com:your-username/ecomm-superlabs.git
 cd ecommerce_task
 
 
+IN Database 
+Kindly run the backend/schema/schema_diff.sql
+kindly run the backend/schema/data_diff.sql
+
+Please run the above file database create a database ecommerce
+
+Change the env file for the database data
 
 ### Run
 cd backend
