@@ -13,7 +13,6 @@ This project was developed as part of the SuperLabs candidate task. The focus is
 - Backend: Node.js (Express.js)
 - Database: PostgreSQL
 - Authentication: JWT with role-based access (Admin/User)
-- Documentation: Swagger/OpenAPI (`/api/docs`)
 - Frontend: Vanilla HTML/JS for testing (React/Tailwind optional upgrade)
 - Deployment: Localhost (port 3334)
 
@@ -60,9 +59,6 @@ This project was developed as part of the SuperLabs candidate task. The focus is
 
 
 
-
-
-
 ---
 
 ## Admin Credentials
@@ -70,8 +66,6 @@ This project was developed as part of the SuperLabs candidate task. The focus is
 - Password: `Admin@123`
 
 ---
-
-## Getting Started
 
 ### Prerequisites
 - Node.js v18+
@@ -82,15 +76,11 @@ This project was developed as part of the SuperLabs candidate task. The focus is
 ```bash
 # Clone repo
 git clone git@github.com:your-username/ecomm-superlabs.git
-cd ecomm-superlabs
+cd ecommerce_task
 
-# Backend
+
+
+### Run
 cd backend
-npm install
-# Create .env with DATABASE_URL and JWT_SECRET
-npm run start:dev
-
-# Frontend
-cd ../frontend
-npm install
-npm run dev
+npm i 
+node index.js
