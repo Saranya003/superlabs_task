@@ -67,26 +67,38 @@ class AdminController extends BaseController {
       requestHandler.validateJoi(error, error ? error.message : "");
   
       const { name, description, price, sku, availability, images } = req.body;
+
   
       // Insert product
       const query = `SELECT admin_create_product($1,$2,$3,$4,$5,$6) AS response`;
       const inputs = ["session123", name, description, price, sku, availability];
       const result = await BaseController.executeSelectQuery(query, inputs);
       const response = result.rows[0].response;
-  
-      // Handle uploaded files
-      if (req.files && req.files.length > 0) {
-        for (const file of req.files) {
 
-          const filePath = `/uploads/products/${file.filename}`;
+      console.log(response);
+  
+
+      console.log('ssssssssss',req.files);
+      // Handle uploaded files
+   
+    
+      const files = req.files.images; // array
+
+      const filenames = files.map(file => file.filename);
+      
+      console.log(filenames);
+
+
+          const filePath = `/uploads/products/${filenames}`;
           await BaseController.executeSelectQuery(
             `SELECT admin_add_product_image($1,$2,$3)`,
             ["session123", response.product_id, filePath]
           );
-        }
-      }
-  
+     
       // Handle image URLs
+
+    
+
       if (images && images.length > 0) {
         for (const img of images) {
           await BaseController.executeSelectQuery(
