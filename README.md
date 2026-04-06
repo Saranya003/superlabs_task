@@ -1,7 +1,5 @@
 # SuperLabs Ecommerce Product Listing System
-
-A full-stack ecommerce product listing platform built as part of the SuperLabs technical task. This repository demonstrates backend API design, database integration, admin product management, and a minimal frontend for testing.
-
+Developed a full-stack eCommerce product listing system with complete admin management features, including adding, editing, updating, and deleting products along with image upload functionality. The platform also provides user features such as viewing product listings, accessing product details, and searching products efficiently.
 ---
 
 ## Introduction
